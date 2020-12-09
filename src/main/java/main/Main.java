@@ -27,6 +27,7 @@ public class Main extends TelegramLongPollingBot {
     private static final String BOT_TOKEN = "1294580446:AAHVEH1Qugkowk0UZgo0iBEgCu-z7dEi9s0";
     /*private static final String BOT_USERNAME = System.getenv("TEST_BOT_TELEGRAM_USERNAME");
     private static final String BOT_TOKEN = System.getenv("TEST_BOT_TELEGRAM_TOKEN");*/
+    private static final String DONATIONALERTS_LINK = "https://www.donationalerts.com/r/maxim_gaiduchek";
 
     private final SimpleSender sender = new SimpleSender(BOT_TOKEN);
     private static final ApplicationContext CONTEXT = new AnnotationConfigApplicationContext(DatasourceConfig.class);
@@ -74,12 +75,11 @@ public class Main extends TelegramLongPollingBot {
     }
 
     private void sendUserMessage(Long chatId) {
-        String msg = """
-                *Привет! Я - бот для упоминания всех юзеров в чате* (практически всех). Сначала добавь меня в твой чат. Что я буду в нем делать: добавь @everyone или /everyone к своему сообщению и я упомяну всех в чате, чтоб они обратили на твое сообщение
-
-                *Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*
-                                
-                Помочь моему творителю: https://www.donationalerts.com/r/saxxxarius""";
+        String msg = "*Привет! Я - бот для упоминания всех юзеров в чате* (практически всех). Сначала добавь меня в твой чат. Что я буду в нем делать: добавь @everyone или /everyone к своему сообщению и я упомяну всех в чате, чтоб они обратили на твое сообщение\n" +
+                     "\n" +
+                     "*Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*\n" +
+                     "\n" +
+                     "Помочь моему творителю: " + DONATIONALERTS_LINK;
 
         sender.sendString(chatId, msg);
     }
@@ -104,12 +104,11 @@ public class Main extends TelegramLongPollingBot {
     }
 
     private void sendFirstGroupMessage(Long chatId) {
-        String msg = """
-                *Привет! Я - бот для упоминания всех юзеров в чате* (практически всех). Что я буду делать делать в чате: добавь @everyone или /everyone к своему сообщению и я упомяну всех в чате, чтоб они обратили на твое сообщение
-
-                *Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*
-                                
-                Помочь моему творителю: https://www.donationalerts.com/r/saxxxarius""";
+        String msg = "*Привет! Я - бот для упоминания всех юзеров в чате* (практически всех). Что я буду делать делать в чате: добавь @everyone или /everyone к своему сообщению и я упомяну всех в чате, чтоб они обратили на твое сообщение\n" +
+                     "\n" +
+                     "*Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*\n" +
+                     "\n" +
+                     "Помочь моему творителю: " + DONATIONALERTS_LINK;
 
         sender.sendString(chatId, msg);
     }
