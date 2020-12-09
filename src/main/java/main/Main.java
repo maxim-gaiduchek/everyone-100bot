@@ -67,19 +67,31 @@ public class Main extends TelegramLongPollingBot {
     private void parseMessage(Message message) {
         //LOGGER.debug(message.getNewChatMembers().toString());
 
-        if (message.isUserMessage()) {
+        if (message.isCommand()) {
+            parseCommand(message);
+        } else if (message.isUserMessage()) {
             sendUserMessage(message.getChatId());
-        } else if (message.isGroupMessage() || message.isSuperGroupMessage()) {
+        }
+        if (message.isGroupMessage() || message.isSuperGroupMessage()) {
             parseGroupMessage(message);
         }
     }
 
+    private void parseCommand(Message message) {
+        Long chatId = message.getChatId();
+
+        switch (message.getText()) {
+            case "/help", "/help@" + BOT_USERNAME -> helpCommand(chatId, message.isUserMessage());
+            case "/donate", "/donate@" + BOT_USERNAME -> donateCommand(chatId);
+        }
+    }
+
     private void sendUserMessage(Long chatId) {
-        String msg = "*Привет! Я - бот для упоминания всех юзеров в чате* (практически всех). Сначала добавь меня в твой чат. Что я буду в нем делать: добавь @everyone или /everyone к своему сообщению и я упомяну всех в чате, чтоб они обратили на твое сообщение\n" +
-                     "\n" +
-                     "*Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*\n" +
-                     "\n" +
-                     "Помочь моему творителю: " + DONATIONALERTS_LINK.replace("_", "\\_");
+        String msg = "*Привет! Я - бот для упоминания всех пользователей в чате* (практически всех). Сначала добавь меня в твой чат. Что я буду в нем делать: добавь @everyone или /everyone к своему сообщению и я упомяну всех в чате, чтоб они обратили на твое сообщение\n" +
+                "\n" +
+                "*Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*\n" +
+                "\n" +
+                "Помочь моему творителю: " + DONATIONALERTS_LINK.replace("_", "\\_");
 
         sender.sendString(chatId, msg);
     }
@@ -104,11 +116,11 @@ public class Main extends TelegramLongPollingBot {
     }
 
     private void sendFirstGroupMessage(Long chatId) {
-        String msg = "*Привет! Я - бот для упоминания всех юзеров в чате* (практически всех). Что я буду делать в чате: добавь @everyone или /everyone к своему сообщению и я упомяну всех в чате, чтоб они обратили на твое сообщение\n" +
-                     "\n" +
-                     "*Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*\n" +
-                     "\n" +
-                     "Помочь моему творителю: " + DONATIONALERTS_LINK.replace("_", "\\_");
+        String msg = "*Привет! Я - бот для упоминания всех пользователей в чате* (практически всех). Что я буду делать в чате: добавь @everyone или /everyone к своему сообщению и я упомяну всех в чате, чтоб они обратили на твое сообщение\n" +
+                "\n" +
+                "*Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*\n" +
+                "\n" +
+                "Помочь моему творителю: " + DONATIONALERTS_LINK.replace("_", "\\_");
 
         sender.sendString(chatId, msg);
     }
@@ -159,6 +171,32 @@ public class Main extends TelegramLongPollingBot {
 
             sender.sendString(chatId, sb.toString(), messageId);
         }).start();
+    }
+
+    // commands
+
+    private void helpCommand(Long chatId, boolean isUserMessage) {
+        String msg;
+
+        if (isUserMessage) {
+            msg = """
+                    *Я - бот для упоминания всех пользователей в чате* (практически всех). Сначала добавь меня в твой чат. Что я буду в нем делать: добавь @everyone или /everyone к своему сообщению и я упомяну всех в чате, чтоб они обратили на твое сообщение
+                                    
+                    *Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*""";
+        } else {
+            msg = """
+                    *Я - бот для упоминания всех пользователей в чате* (практически всех). Что я делаю в чате: добавь @everyone или /everyone к своему сообщению и я упомяну всех в чате, чтоб они обратили на твое сообщение
+                                    
+                    *Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*""";
+        }
+
+        sender.sendString(chatId, msg);
+    }
+
+    private void donateCommand(Long chatId) {
+        String msg = "Помочь моему творителю: " + DONATIONALERTS_LINK.replace("_", "\\_");
+
+        sender.sendString(chatId, msg);
     }
 
     // main
