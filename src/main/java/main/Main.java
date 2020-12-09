@@ -64,7 +64,7 @@ public class Main extends TelegramLongPollingBot {
     // message parsing
 
     private void parseMessage(Message message) {
-        LOGGER.debug(message.getNewChatMembers().toString());
+        //LOGGER.debug(message.getNewChatMembers().toString());
 
         if (message.isUserMessage()) {
             sendUserMessage(message.getChatId());
@@ -141,7 +141,9 @@ public class Main extends TelegramLongPollingBot {
     private boolean isBotCalled(List<MessageEntity> entities) {
         if (entities != null) {
             for (MessageEntity entity : entities) {
-                if (entity.getText().equals("@everyone") || entity.getText().equals("/everyone")) return true;
+                if (entity.getText().equals("@everyone") ||
+                        entity.getText().equals("/everyone") ||
+                        entity.getText().equals("/everyone@" + BOT_USERNAME)) return true;
             }
         }
         return false;
