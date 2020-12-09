@@ -78,7 +78,7 @@ public class Main extends TelegramLongPollingBot {
                 *Привет! Я - бот для упоминания всех юзеров в чате* (практически всех). Сначала добавь меня в твой чат. Что я буду в нем делать: добавь @everyone или /everyone к своему сообщению и я упомяну всех в чате, чтоб они обратили на твое сообщение
 
                 *Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*
-                
+                                
                 Помочь моему творителю: https://www.donationalerts.com/r/saxxxarius""";
 
         sender.sendString(chatId, msg);
@@ -108,7 +108,7 @@ public class Main extends TelegramLongPollingBot {
                 *Привет! Я - бот для упоминания всех юзеров в чате* (практически всех). Что я буду делать делать в чате: добавь @everyone или /everyone к своему сообщению и я упомяну всех в чате, чтоб они обратили на твое сообщение
 
                 *Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*
-                
+                                
                 Помочь моему творителю: https://www.donationalerts.com/r/saxxxarius""";
 
         sender.sendString(chatId, msg);
@@ -143,20 +143,23 @@ public class Main extends TelegramLongPollingBot {
             for (MessageEntity entity : entities) {
                 if (entity.getText().equals("@everyone") ||
                         entity.getText().equals("/everyone") ||
-                        entity.getText().equals("/everyone@" + BOT_USERNAME)) return true;
+                        entity.getText().equals("/everyone@" + BOT_USERNAME))
+                    return true;
             }
         }
         return false;
     }
 
     private void sendReply(BotChat chat, Long chatId, Integer messageId) {
-        StringBuilder sb = new StringBuilder();
+        new Thread(() -> {
+            StringBuilder sb = new StringBuilder();
 
-        for (ChatUser user : chat.getUsers()) {
-            sb.append("[").append(user.getName()).append("](tg://user?id=").append(user.getUserId()).append(") ");
-        }
+            for (ChatUser user : chat.getUsers()) {
+                sb.append("[").append(user.getName()).append("](tg://user?id=").append(user.getUserId()).append(") ");
+            }
 
-        sender.sendString(chatId, sb.toString(), messageId);
+            sender.sendString(chatId, sb.toString(), messageId);
+        }).start();
     }
 
     // main
