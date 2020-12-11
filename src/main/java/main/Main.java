@@ -23,11 +23,11 @@ public class Main extends TelegramLongPollingBot {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
-    private static final String BOT_USERNAME = "Everyone100Bot";
-    private static final String BOT_TOKEN = "1294580446:AAHVEH1Qugkowk0UZgo0iBEgCu-z7dEi9s0";
+    private static final String BOT_USERNAME = System.getenv("EVERYONE_100BOT_TELEGRAM_USERNAME");
+    private static final String BOT_TOKEN = System.getenv("EVERYONE_100BOT_TELEGRAM_TOKEN");
     /*private static final String BOT_USERNAME = System.getenv("TEST_BOT_TELEGRAM_USERNAME");
     private static final String BOT_TOKEN = System.getenv("TEST_BOT_TELEGRAM_TOKEN");*/
-    private static final String DONATIONALERTS_LINK = "https://www.donationalerts.com/r/maxim_gaiduchek";
+    private static final String DONATIONALERTS_LINK = System.getenv("DONATIONALERTS_LINK");
 
     private final SimpleSender sender = new SimpleSender(BOT_TOKEN);
     private static final ApplicationContext CONTEXT = new AnnotationConfigApplicationContext(DatasourceConfig.class);
@@ -81,9 +81,9 @@ public class Main extends TelegramLongPollingBot {
         Long chatId = message.getChatId();
 
         switch (message.getText()) {
-            case "/help", "/help@" + BOT_USERNAME -> helpCommand(chatId, message.isUserMessage());
-            case "/donate", "/donate@" + BOT_USERNAME -> donateCommand(chatId);
-        }
+            case "/help", "/help@Everyone100Bot" -> helpCommand(chatId, message.isUserMessage());
+            case "/donate", "/donate@Everyone100Bot" -> donateCommand(chatId);
+        } // TODO change "/help@Everyone100Bot" to "/help@" + BOT_USERNAME
     }
 
     private void sendUserMessage(Long chatId) {
@@ -97,21 +97,26 @@ public class Main extends TelegramLongPollingBot {
     }
 
     private void parseGroupMessage(Message message) {
-        Chat chat = message.getChat();
-        Long chatId = chat.getId();
+        Long chatId = message.getChat().getId();
         Integer messageId = message.getMessageId();
 
         if (!chatsByChatIds.containsKey(chatId)) {
             sendFirstGroupMessage(chatId);
         }
 
-        BotChat botChat = addUserAndGetChat(chatId, message.getFrom());
+        BotChat chat = getChat(chatId);
+
+        addUser(chat, message.getFrom());
         if (message.isReply()) {
-            addUserAndGetChat(chatId, message.getReplyToMessage().getFrom());
+            addUser(chat, message.getReplyToMessage().getFrom());
         }
+        if (!message.getNewChatMembers().isEmpty()) {
+            addUsers(chat, message.getNewChatMembers());
+        }
+        SERVICE.saveBotChat(chat);
 
         if (isBotCalled(message.getEntities())) {
-            sendReply(botChat, chatId, messageId);
+            sendReply(chat, chatId, messageId);
         }
     }
 
@@ -127,26 +132,26 @@ public class Main extends TelegramLongPollingBot {
 
     // bot actions
 
-    private BotChat addUserAndGetChat(Long chatId, User user) {
-        BotChat chat = null;
+    private BotChat getChat(Long chatId) {
+        BotChat chat;
 
-        if (!user.getIsBot()) {
-            boolean isFirstTime = false;
-
-            if (chatsByChatIds.containsKey(chatId)) {
-                chat = SERVICE.getBotChat(chatsByChatIds.get(chatId));
-            } else {
-                chat = new BotChat(chatId);
-                isFirstTime = true;
-            }
-
-            chat.addUser(new ChatUser(user));
+        if (chatsByChatIds.containsKey(chatId)) {
+            chat = SERVICE.getBotChat(chatsByChatIds.get(chatId));
+        } else {
+            chat = new BotChat(chatId);
             SERVICE.saveBotChat(chat);
-
-            if (isFirstTime) chatsByChatIds.put(chatId, chat.getId());
+            chatsByChatIds.put(chatId, chat.getId());
         }
 
         return chat;
+    }
+
+    private void addUser(BotChat chat, User user) {
+        if (!user.getIsBot()) chat.addUser(new ChatUser(user));
+    }
+
+    private void addUsers(BotChat chat, List<User> users) {
+        users.forEach(user -> addUser(chat, user));
     }
 
     private boolean isBotCalled(List<MessageEntity> entities) {
