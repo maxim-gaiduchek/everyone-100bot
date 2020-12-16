@@ -1,6 +1,7 @@
 package entities;
 
-import datasourse.converters.UserSetToStringConverter;
+import datasourse.converters.IntegerListToStringConverter;
+import datasourse.converters.UserListToStringConverter;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -19,8 +20,12 @@ public class BotChat {
     private long chatId;
 
     @Column(name = "users")
-    @Convert(converter = UserSetToStringConverter.class)
-    private List<ChatUser> users = new ArrayList<>();
+    @Convert(converter = UserListToStringConverter.class)
+    private final List<ChatUser> users = new ArrayList<>();
+
+    @Column(name = "muted")
+    @Convert(converter = IntegerListToStringConverter.class)
+    private final List<Integer> muted = new ArrayList<>();
 
     private BotChat() {
     }
@@ -43,10 +48,38 @@ public class BotChat {
         return users;
     }
 
+    public boolean isMuted(Integer userId) {
+        return muted.contains(userId);
+    }
+
     // setters
 
     public void addUser(ChatUser user) {
-        if (!users.contains(user)) users.add(user);
+        if (users.contains(user)) {
+            users.forEach(chatUser -> {
+                if (chatUser.getUserId().equals(user.getUserId())) {
+                    chatUser.setName(user.getName());
+                }
+            }); // TODO fix
+        } else {
+            users.add(user);
+        }
+    }
+
+    public void deleteUser(Integer userId) {
+        users.removeIf(chatUser -> chatUser.getUserId().equals(userId));
+    }
+
+    public boolean switchMute(Integer userId) {
+        boolean isMuted = isMuted(userId);
+
+        if (isMuted) {
+            muted.remove(userId);
+        } else {
+            muted.add(userId);
+        }
+
+        return !isMuted;
     }
 
     // core

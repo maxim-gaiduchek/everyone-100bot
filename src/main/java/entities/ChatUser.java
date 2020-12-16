@@ -4,7 +4,7 @@ import org.telegram.telegrambots.meta.api.objects.User;
 
 public class ChatUser {
 
-    private final String name;
+    private String name;
     private final Integer userId;
 
     public ChatUser(User user) {
@@ -29,6 +29,12 @@ public class ChatUser {
 
     public String toDBString(String regex) {
         return name + regex + userId;
+    }
+
+    // setter
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     // core

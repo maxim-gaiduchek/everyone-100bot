@@ -10,7 +10,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
-import org.telegram.telegrambots.meta.api.objects.*;
+import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.MessageEntity;
+import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import utils.SimpleSender;
@@ -28,6 +31,7 @@ public class Main extends TelegramLongPollingBot {
     /*private static final String BOT_USERNAME = System.getenv("TEST_BOT_TELEGRAM_USERNAME");
     private static final String BOT_TOKEN = System.getenv("TEST_BOT_TELEGRAM_TOKEN");*/
     private static final String DONATIONALERTS_LINK = System.getenv("DONATIONALERTS_LINK");
+    private static final long WAIT_TO_DELETE_MILLIS = 5000;
 
     private final SimpleSender sender = new SimpleSender(BOT_TOKEN);
     private static final ApplicationContext CONTEXT = new AnnotationConfigApplicationContext(DatasourceConfig.class);
@@ -55,11 +59,13 @@ public class Main extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        LOGGER.debug(update.toString());
+        new Thread(() -> {
+            LOGGER.debug(update.toString());
 
-        if (update.hasMessage()) {
-            parseMessage(update.getMessage());
-        }
+            if (update.hasMessage()) {
+                parseMessage(update.getMessage());
+            }
+        }).start();
     }
 
     // message parsing
@@ -83,6 +89,7 @@ public class Main extends TelegramLongPollingBot {
         switch (message.getText()) {
             case "/help", "/help@Everyone100Bot" -> helpCommand(chatId, message.isUserMessage());
             case "/donate", "/donate@Everyone100Bot" -> donateCommand(chatId);
+            case "/switchmute", "/switchmute@Everyone100Bot" -> switchMuteCommand(chatId, message.getFrom().getId(), message.getMessageId());
         } // TODO change "/help@Everyone100Bot" to "/help@" + BOT_USERNAME
     }
 
@@ -94,7 +101,7 @@ public class Main extends TelegramLongPollingBot {
                 "Помочь моему творителю: " + DONATIONALERTS_LINK.replace("_", "\\_");
 
         sender.sendString(chatId, msg);
-    }
+    } // TODO get admin rights
 
     private void parseGroupMessage(Message message) {
         Long chatId = message.getChat().getId();
@@ -112,6 +119,9 @@ public class Main extends TelegramLongPollingBot {
         }
         if (!message.getNewChatMembers().isEmpty()) {
             addUsers(chat, message.getNewChatMembers());
+        }
+        if (message.getLeftChatMember() != null) {
+            chat.deleteUser(message.getLeftChatMember().getId());
         }
         SERVICE.saveBotChat(chat);
 
@@ -167,15 +177,17 @@ public class Main extends TelegramLongPollingBot {
     }
 
     private void sendReply(BotChat chat, Long chatId, Integer messageId) {
-        new Thread(() -> {
-            StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
-            for (ChatUser user : chat.getUsers()) {
+        for (ChatUser user : chat.getUsers()) {
+            if (!chat.isMuted(user.getUserId())) {
                 sb.append("[").append(user.getName()).append("](tg://user?id=").append(user.getUserId()).append(") ");
+            } else {
+                sb.append(user.getName()).append(" ");
             }
+        }
 
-            sender.sendString(chatId, sb.toString(), messageId);
-        }).start();
+        sender.sendString(chatId, sb.toString(), messageId);
     }
 
     // commands
@@ -202,6 +214,20 @@ public class Main extends TelegramLongPollingBot {
         String msg = "Помочь моему творителю: " + DONATIONALERTS_LINK.replace("_", "\\_");
 
         sender.sendString(chatId, msg);
+    }
+
+    private void switchMuteCommand(Long chatId, Integer userId, Integer messageId) {
+        BotChat chat = getChat(chatId);
+        boolean isMuted = chat.switchMute(userId);
+        String msg = "Теперь я " + (isMuted ? "не " : "") + "буду вас упоминать";
+
+        sender.sendString(chatId, msg);
+        SERVICE.saveBotChat(chat);
+        /*sender.deleteMessage(chatId, messageId);
+            Integer sentMessageId = .getMessageId();
+            Thread.sleep(WAIT_TO_DELETE_MILLIS);
+            sender.deleteMessage(chatId, sentMessageId);*/
+
     }
 
     // main

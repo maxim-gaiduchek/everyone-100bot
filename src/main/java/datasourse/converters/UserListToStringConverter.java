@@ -4,10 +4,9 @@ import entities.ChatUser;
 
 import javax.persistence.AttributeConverter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-public class UserSetToStringConverter implements AttributeConverter<List<ChatUser>, String> {
+public class UserListToStringConverter implements AttributeConverter<List<ChatUser>, String> {
 
     private static final String SPLIT_REGEX = "\uD83D\uDD4B\uD83D\uDC69\u200D❤️\u200D\uD83D\uDC8B\u200D\uD83D\uDC69\uD83D\uDC37";
     private static final String USER_SPLIT_REGEX = "\uD83E\uDD9A\uD83C\uDF28\uD83E\uDD52";
