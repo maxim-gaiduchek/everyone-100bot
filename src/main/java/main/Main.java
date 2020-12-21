@@ -120,8 +120,12 @@ public class Main extends TelegramLongPollingBot {
         if (!message.getNewChatMembers().isEmpty()) {
             addUsers(chat, message.getNewChatMembers());
         }
-        if (message.getLeftChatMember() != null) {
-            chat.deleteUser(message.getLeftChatMember().getId());
+        try {
+            if (message.getLeftChatMember() != null && !getMe().equals(message.getLeftChatMember())) {
+                chat.deleteUser(message.getLeftChatMember().getId());
+            } // TODO add case if this bot is kicked
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
         }
         SERVICE.saveBotChat(chat);
 
@@ -138,7 +142,7 @@ public class Main extends TelegramLongPollingBot {
                 "Помочь моему творителю: " + DONATIONALERTS_LINK.replace("_", "\\_");
 
         sender.sendString(chatId, msg);
-    }
+    } // TODO button
 
     // bot actions
 
@@ -157,7 +161,7 @@ public class Main extends TelegramLongPollingBot {
     }
 
     private void addUser(BotChat chat, User user) {
-        if (!user.getIsBot()) chat.addUser(new ChatUser(user));
+        if (user != null && !user.getIsBot()) chat.addUser(new ChatUser(user));
     }
 
     private void addUsers(BotChat chat, List<User> users) {
