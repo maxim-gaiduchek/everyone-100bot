@@ -103,6 +103,7 @@ public class BotChat {
                 "id=" + id +
                 ", chatId=" + chatId +
                 ", users=" + users +
+                ", muted=" + muted +
                 '}';
     }
 }

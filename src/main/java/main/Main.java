@@ -89,6 +89,9 @@ public class Main extends TelegramLongPollingBot {
         Long chatId = message.getChatId();
 
         switch (message.getText()) {
+            case "/start" -> {
+                if (message.isUserMessage()) sendUserMessage(chatId);
+            }
             case "/help", "/help@Everyone100Bot" -> helpCommand(chatId, message.isUserMessage());
             case "/donate", "/donate@Everyone100Bot" -> donateCommand(chatId);
             case "/switchmute", "/switchmute@Everyone100Bot" -> {
@@ -99,9 +102,7 @@ public class Main extends TelegramLongPollingBot {
                 }
             }
             case "/everyone", "/everyone@Everyone100Bot" -> {
-                if (message.isUserMessage()) {
-                    sendCommandCannotBeUsed(chatId);
-                }
+                if (message.isUserMessage()) sendCommandCannotBeUsed(chatId);
             }
         } // TODO change "/help@Everyone100Bot" to "/help@" + BOT_USERNAME
     }
@@ -152,7 +153,9 @@ public class Main extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
+        System.out.println(chat);
         SERVICE.saveBotChat(chat);
+        System.out.println(chat);
 
         if (isBotCalled(message.getEntities())) {
             sendReply(chat, chatId, messageId);
