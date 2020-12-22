@@ -1,11 +1,13 @@
 package entities;
 
 import datasourse.converters.IntegerListToStringConverter;
-import datasourse.converters.UserListToStringConverter;
+import datasourse.converters.UserMapToStringConverter;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "chats")
@@ -20,8 +22,8 @@ public class BotChat {
     private long chatId;
 
     @Column(name = "users")
-    @Convert(converter = UserListToStringConverter.class)
-    private final List<ChatUser> users = new ArrayList<>();
+    @Convert(converter = UserMapToStringConverter.class)
+    private final Map<Integer, ChatUser> users = new HashMap<>();
 
     @Column(name = "muted")
     @Convert(converter = IntegerListToStringConverter.class)
@@ -45,7 +47,7 @@ public class BotChat {
     }
 
     public List<ChatUser> getUsers() {
-        return users;
+        return (ArrayList<ChatUser>) users.values();
     }
 
     public boolean isMuted(Integer userId) {
@@ -55,19 +57,17 @@ public class BotChat {
     // setters
 
     public void addUser(ChatUser user) {
-        if (users.contains(user)) {
-            users.forEach(chatUser -> {
-                if (chatUser.getUserId().equals(user.getUserId())) {
-                    chatUser.setName(user.getName());
-                }
-            }); // TODO fix
+        Integer userId = user.getUserId();
+
+        if (users.containsKey(userId)) {
+            users.get(userId).setName(user.getName());
         } else {
-            users.add(user);
+            users.put(userId, user);
         }
     }
 
     public void deleteUser(Integer userId) {
-        users.removeIf(chatUser -> chatUser.getUserId().equals(userId));
+        users.remove(userId);
     }
 
     public boolean switchMute(Integer userId) {
