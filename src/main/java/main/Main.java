@@ -91,7 +91,18 @@ public class Main extends TelegramLongPollingBot {
         switch (message.getText()) {
             case "/help", "/help@Everyone100Bot" -> helpCommand(chatId, message.isUserMessage());
             case "/donate", "/donate@Everyone100Bot" -> donateCommand(chatId);
-            case "/switchmute", "/switchmute@Everyone100Bot" -> switchMuteCommand(chatId, message.getFrom().getId(), message.getMessageId());
+            case "/switchmute", "/switchmute@Everyone100Bot" -> {
+                if (message.isUserMessage()) {
+                    sendCommandCannotBeUsed(chatId);
+                } else {
+                    switchMuteCommand(chatId, message.getFrom().getId(), message.getMessageId());
+                }
+            }
+            case "/everyone", "/everyone@Everyone100Bot" -> {
+                if (message.isUserMessage()) {
+                    sendCommandCannotBeUsed(chatId);
+                }
+            }
         } // TODO change "/help@Everyone100Bot" to "/help@" + BOT_USERNAME
     }
 
@@ -108,6 +119,13 @@ public class Main extends TelegramLongPollingBot {
                 /switchmute - Включить/выключить упоминание""";
 
         sender.sendStringAndInlineKeyboard(chatId, msg, getDonationKeyboard());
+    }
+
+    private void sendCommandCannotBeUsed(Long chatId) {
+        String msg = """
+                Добавь меня в чат, чтоб использовать эту команду :)""";
+
+        sender.sendString(chatId, msg);
     }
 
     private void parseGroupMessage(Message message) {
