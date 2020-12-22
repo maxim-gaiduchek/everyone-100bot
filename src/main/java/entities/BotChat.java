@@ -47,7 +47,7 @@ public class BotChat {
     }
 
     public List<ChatUser> getUsers() {
-        return (ArrayList<ChatUser>) users.values();
+        return new ArrayList<>(users.values());
     }
 
     public boolean isMuted(Integer userId) {

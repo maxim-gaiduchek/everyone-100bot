@@ -18,7 +18,7 @@ public class UserMapToStringConverter implements AttributeConverter<Map<Integer,
         if (users.isEmpty()) return "";
 
         StringBuilder sb = new StringBuilder();
-        List<ChatUser> usersList = (ArrayList<ChatUser>) users.values();
+        List<ChatUser> usersList = new ArrayList<>(users.values());
 
         sb.append(usersList.get(0).toDBString(USER_SPLIT_REGEX));
         for (int i = 1; i < users.size(); i++) {
