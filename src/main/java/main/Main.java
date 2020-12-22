@@ -14,10 +14,12 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.MessageEntity;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import utils.SimpleSender;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,14 +96,19 @@ public class Main extends TelegramLongPollingBot {
     }
 
     private void sendUserMessage(Long chatId) {
-        String msg = "*Привет! Я - бот для упоминания всех пользователей в чате* (практически всех). Сначала добавь меня в твой чат. Что я буду в нем делать: добавь @everyone или /everyone к своему сообщению и я упомяну всех в чате, чтоб они обратили на твое сообщение\n" +
-                "\n" +
-                "*Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*\n" +
-                "\n" +
-                "Помочь моему творителю: " + DONATIONALERTS_LINK.replace("_", "\\_");
+        String msg = """
+                *Привет! Я - бот для упоминания всех пользователей в чате* (практически всех). Сначала добавь меня в твой чат. Что я буду в нем делать: добавь @everyone или /everyone к своему сообщению и я упомяну всех в чате, чтоб они обратили на твое сообщение
 
-        sender.sendString(chatId, msg);
-    } // TODO get admin rights
+                *Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*
+                                
+                *Команды*
+                /everyone - Упомянуть всех
+                /help - Как пользоваться ботом
+                /donate - Помочь творителю
+                /switchmute - Включить/выключить упоминание""";
+
+        sender.sendStringAndInlineKeyboard(chatId, msg, getDonationKeyboard());
+    }
 
     private void parseGroupMessage(Message message) {
         Long chatId = message.getChat().getId();
@@ -135,14 +142,19 @@ public class Main extends TelegramLongPollingBot {
     }
 
     private void sendFirstGroupMessage(Long chatId) {
-        String msg = "*Привет! Я - бот для упоминания всех пользователей в чате* (практически всех). Что я буду делать в чате: добавь @everyone или /everyone к своему сообщению и я упомяну всех в чате, чтоб они обратили на твое сообщение\n" +
-                "\n" +
-                "*Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*\n" +
-                "\n" +
-                "Помочь моему творителю: " + DONATIONALERTS_LINK.replace("_", "\\_");
+        String msg = """
+                *Привет! Я - бот для упоминания всех пользователей в чате* (практически всех). Что я буду делать в чате: добавь @everyone или /everyone к своему сообщению и я упомяну всех в чате, чтоб они обратили на твое сообщение
 
-        sender.sendString(chatId, msg);
-    } // TODO button
+                *Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*
+                                
+                *Команды*
+                /everyone - Упомянуть всех
+                /help - Как пользоваться ботом
+                /donate - Помочь творителю
+                /switchmute - Включить/выключить упоминание""";
+
+        sender.sendStringAndInlineKeyboard(chatId, msg, getDonationKeyboard());
+    }
 
     // bot actions
 
@@ -203,21 +215,32 @@ public class Main extends TelegramLongPollingBot {
             msg = """
                     *Я - бот для упоминания всех пользователей в чате* (практически всех). Сначала добавь меня в твой чат. Что я буду в нем делать: добавь @everyone или /everyone к своему сообщению и я упомяну всех в чате, чтоб они обратили на твое сообщение
                                     
-                    *Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*""";
+                    *Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*
+                                        
+                    *Команды*
+                    /everyone - Упомянуть всех
+                    /help - Как пользоваться ботом
+                    /donate - Помочь творителю
+                    /switchmute - Включить/выключить упоминание""";
         } else {
             msg = """
                     *Я - бот для упоминания всех пользователей в чате* (практически всех). Что я делаю в чате: добавь @everyone или /everyone к своему сообщению и я упомяну всех в чате, чтоб они обратили на твое сообщение
                                     
-                    *Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*""";
+                    *Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*
+                    *Команды*
+                    /everyone - Упомянуть всех
+                    /help - Как пользоваться ботом
+                    /donate - Помочь творителю
+                    /switchmute - Включить/выключить упоминание""";
         }
 
         sender.sendString(chatId, msg);
     }
 
     private void donateCommand(Long chatId) {
-        String msg = "Помочь моему творителю: " + DONATIONALERTS_LINK.replace("_", "\\_");
+        String msg = "Творитель будет рад любой мелочи <3";
 
-        sender.sendString(chatId, msg);
+        sender.sendStringAndInlineKeyboard(chatId, msg, getDonationKeyboard());
     }
 
     private void switchMuteCommand(Long chatId, Integer userId, Integer messageId) {
@@ -232,6 +255,18 @@ public class Main extends TelegramLongPollingBot {
             Thread.sleep(WAIT_TO_DELETE_MILLIS);
             sender.deleteMessage(chatId, sentMessageId);*/
 
+    } // TODO get admin rights
+
+    // keyboards
+
+    private List<List<InlineKeyboardButton>> getDonationKeyboard() {
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+        List<InlineKeyboardButton> row = new ArrayList<>();
+
+        row.add(InlineKeyboardButton.builder().text("Помочь моему творителю").url(DONATIONALERTS_LINK).build());
+        keyboard.add(row);
+
+        return keyboard;
     }
 
     // main
