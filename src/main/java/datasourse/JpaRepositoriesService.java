@@ -25,7 +25,7 @@ public class JpaRepositoriesService implements Service {
 
     @Override
     public void saveBotChat(BotChat chat) {
-        System.out.println(chat);
+        //System.out.println(chat);
         repository.save(chat);
     }
 }

@@ -153,9 +153,9 @@ public class Main extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
-        System.out.println(chat);
+        //System.out.println(chat);
         SERVICE.saveBotChat(chat);
-        System.out.println(chat);
+        //System.out.println(chat);
 
         if (isBotCalled(message.getEntities())) {
             sendReply(chat, chatId, messageId);
