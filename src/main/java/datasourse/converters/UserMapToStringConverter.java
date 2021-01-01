@@ -15,17 +15,7 @@ public class UserMapToStringConverter implements AttributeConverter<Map<Integer,
 
     @Override
     public String convertToDatabaseColumn(Map<Integer, ChatUser> users) {
-        if (users.isEmpty()) return "";
-
-        StringBuilder sb = new StringBuilder();
-        List<ChatUser> usersList = new ArrayList<>(users.values());
-
-        sb.append(usersList.get(0).toDBString(USER_SPLIT_REGEX));
-        for (int i = 1; i < users.size(); i++) {
-            sb.append(SPLIT_REGEX).append(usersList.get(i).toDBString(USER_SPLIT_REGEX));
-        }
-
-        return sb.toString();
+        return convertMapToString(users);
     }
 
     @Override
@@ -41,5 +31,19 @@ public class UserMapToStringConverter implements AttributeConverter<Map<Integer,
         }
 
         return list;
+    }
+
+    public static String convertMapToString(Map<Integer, ChatUser> users) {
+        if (users.isEmpty()) return "";
+
+        StringBuilder sb = new StringBuilder();
+        List<ChatUser> usersList = new ArrayList<>(users.values());
+
+        sb.append(usersList.get(0).toDBString(USER_SPLIT_REGEX));
+        for (int i = 1; i < users.size(); i++) {
+            sb.append(SPLIT_REGEX).append(usersList.get(i).toDBString(USER_SPLIT_REGEX));
+        }
+
+        return sb.toString();
     }
 }

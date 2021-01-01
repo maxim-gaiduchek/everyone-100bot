@@ -11,4 +11,6 @@ public interface Service {
     List<BotChat> getBotChats();
 
     void saveBotChat(BotChat chat);
+
+    void updateBotChatUserName(BotChat chat);
 }

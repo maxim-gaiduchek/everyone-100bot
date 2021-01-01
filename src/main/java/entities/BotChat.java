@@ -2,6 +2,7 @@ package entities;
 
 import datasourse.converters.IntegerListToStringConverter;
 import datasourse.converters.UserMapToStringConverter;
+import main.Main;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -46,6 +47,10 @@ public class BotChat {
         return chatId;
     }
 
+    public Map<Integer, ChatUser> getUsersMap() {
+        return users;
+    }
+
     public List<ChatUser> getUsers() {
         return new ArrayList<>(users.values());
     }
@@ -61,6 +66,7 @@ public class BotChat {
 
         if (users.containsKey(userId)) {
             users.get(userId).setName(user.getName());
+            Main.SERVICE.updateBotChatUserName(this);
         } else {
             users.put(userId, user);
         }

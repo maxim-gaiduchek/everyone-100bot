@@ -37,7 +37,7 @@ public class Main extends TelegramLongPollingBot {
 
     private final SimpleSender sender = new SimpleSender(BOT_TOKEN);
     private static final ApplicationContext CONTEXT = new AnnotationConfigApplicationContext(DatasourceConfig.class);
-    private static final Service SERVICE = (Service) CONTEXT.getBean("service");
+    public static final Service SERVICE = (Service) CONTEXT.getBean("service");
 
     private final Map<Long, Integer> chatsByChatIds = new HashMap<>();
 
@@ -149,13 +149,12 @@ public class Main extends TelegramLongPollingBot {
         try {
             if (message.getLeftChatMember() != null && !getMe().equals(message.getLeftChatMember())) {
                 chat.deleteUser(message.getLeftChatMember().getId());
-            } // TODO add case if this bot is kicked
+            } // TODO case if this bot is kicked
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
-        //System.out.println(chat);
+
         SERVICE.saveBotChat(chat);
-        //System.out.println(chat);
 
         if (isBotCalled(message.getEntities())) {
             sendReply(chat, chatId, messageId);
@@ -248,6 +247,7 @@ public class Main extends TelegramLongPollingBot {
                     *Я - бот для упоминания всех пользователей в чате* (практически всех). Что я делаю в чате: добавь @everyone или /everyone к своему сообщению и я упомяну всех в чате, чтоб они обратили на твое сообщение
                                     
                     *Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*
+                                        
                     *Команды*
                     /everyone - Упомянуть всех
                     /help - Как пользоваться ботом
@@ -269,12 +269,17 @@ public class Main extends TelegramLongPollingBot {
         boolean isMuted = chat.switchMute(userId);
         String msg = "Теперь я " + (isMuted ? "не " : "") + "буду вас упоминать";
 
-        sender.sendString(chatId, msg);
         SERVICE.saveBotChat(chat);
-        /*sender.deleteMessage(chatId, messageId);
-            Integer sentMessageId = .getMessageId();
+        sender.sendString(chatId, msg);
+
+        /*try {
+            Message message = sender.sendString(chatId, msg);
+            sender.deleteMessage(chatId, messageId);
             Thread.sleep(WAIT_TO_DELETE_MILLIS);
-            sender.deleteMessage(chatId, sentMessageId);*/
+            sender.deleteMessage(chatId, message.getMessageId());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
 
     } // TODO get admin rights
 
