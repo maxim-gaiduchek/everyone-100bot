@@ -214,14 +214,23 @@ public class Main extends TelegramLongPollingBot {
 
     private void sendReply(BotChat chat, Long chatId, Integer messageId) {
         StringBuilder sb = new StringBuilder();
+        List<ChatUser> users = chat.getUsers();
+        int noReplyCounter = 0;
 
-        for (ChatUser user : chat.getUsers()) {
+        for (ChatUser user : users) {
             if (!chat.isMuted(user.getUserId())) {
                 sb.append("[").append(user.getName()).append("](tg://user?id=").append(user.getUserId()).append(") ");
             } else {
                 sb.append(user.getName()).append(" ");
+                noReplyCounter++;
             }
         }
+
+        int replies = users.size() - noReplyCounter;
+
+        sb.append("_(").append(replies).append(" упомянуто");
+        if (noReplyCounter > 0) sb.append(", ").append(noReplyCounter).append(" не упомянуто");
+        sb.append(")_");
 
         sender.sendString(chatId, sb.toString(), messageId);
     }
