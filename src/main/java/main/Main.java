@@ -17,6 +17,7 @@ import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
+import utils.Formatter;
 import utils.SimpleSender;
 
 import java.util.ArrayList;
@@ -221,7 +222,7 @@ public class Main extends TelegramLongPollingBot {
             if (!chat.isMuted(user.getUserId())) {
                 sb.append("[").append(user.getName()).append("](tg://user?id=").append(user.getUserId()).append(") ");
             } else {
-                sb.append(user.getName()).append(" ");
+                sb.append(Formatter.formatTelegramText(user.getName())).append(" ");
                 noReplyCounter++;
             }
         }
