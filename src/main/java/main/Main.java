@@ -34,6 +34,7 @@ public class Main extends TelegramLongPollingBot {
     /*private static final String BOT_USERNAME = System.getenv("TEST_BOT_TELEGRAM_USERNAME");
     private static final String BOT_TOKEN = System.getenv("TEST_BOT_TELEGRAM_TOKEN");*/
     private static final String DONATIONALERTS_LINK = System.getenv("DONATIONALERTS_LINK");
+    private static final long DEV_CHAT_ID = 505457346L;
     private static final long WAIT_TO_DELETE_MILLIS = 5000;
 
     private final SimpleSender sender = new SimpleSender(BOT_TOKEN);
@@ -83,27 +84,37 @@ public class Main extends TelegramLongPollingBot {
         }
         if (message.isGroupMessage() || message.isSuperGroupMessage()) {
             parseGroupMessage(message);
+        } else {
+            sender.leaveChat(message.getChatId());
         }
     }
 
     private void parseCommand(Message message) {
         Long chatId = message.getChatId();
+        boolean isUserMessage = message.isUserMessage();
 
         switch (message.getText()) {
-            case "/start" -> {
-                if (message.isUserMessage()) sendUserMessage(chatId);
+            case "/everyone", "/everyone@Everyone100Bot" -> {
+                if (isUserMessage) sendCommandCannotBeUsed(chatId);
             }
-            case "/help", "/help@Everyone100Bot" -> helpCommand(chatId, message.isUserMessage());
-            case "/donate", "/donate@Everyone100Bot" -> donateCommand(chatId);
             case "/switchmute", "/switchmute@Everyone100Bot" -> {
-                if (message.isUserMessage()) {
+                if (isUserMessage) {
                     sendCommandCannotBeUsed(chatId);
                 } else {
                     switchMuteCommand(chatId, message.getFrom().getId(), message.getMessageId());
                 }
             }
-            case "/everyone", "/everyone@Everyone100Bot" -> {
-                if (message.isUserMessage()) sendCommandCannotBeUsed(chatId);
+            case "/help", "/help@Everyone100Bot" -> helpCommand(chatId, isUserMessage);
+            case "/donate", "/donate@Everyone100Bot" -> donateCommand(chatId);
+            case "/sendstats" -> {
+                if (chatId.equals(DEV_CHAT_ID)) {
+                    sender.sendString(DEV_CHAT_ID, "Бота добавлено в *" + chatsByChatIds.size() + " чата(-ов)*");
+                } else {
+                    if (isUserMessage) sendUserMessage(chatId);
+                }
+            }
+            default -> {
+                if (isUserMessage) sendUserMessage(chatId);
             }
         } // TODO change "/help@Everyone100Bot" to "/help@" + BOT_USERNAME
     }
@@ -170,9 +181,9 @@ public class Main extends TelegramLongPollingBot {
                                 
                 *Команды*
                 /everyone - Упомянуть всех
+                /switchmute - Включить/выключить упоминание
                 /help - Как пользоваться ботом
-                /donate - Помочь творителю
-                /switchmute - Включить/выключить упоминание""";
+                /donate - Помочь творителю""";
 
         sender.sendStringAndInlineKeyboard(chatId, msg, getDonationKeyboard());
     }
@@ -205,8 +216,8 @@ public class Main extends TelegramLongPollingBot {
         if (entities != null) {
             for (MessageEntity entity : entities) {
                 if (entity.getText().equals("@everyone") ||
-                        entity.getText().equals("/everyone") ||
-                        entity.getText().equals("/everyone@" + BOT_USERNAME))
+                    entity.getText().equals("/everyone") ||
+                    entity.getText().equals("/everyone@" + BOT_USERNAME))
                     return true;
             }
         }
