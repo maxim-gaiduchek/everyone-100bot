@@ -209,10 +209,10 @@ public class Main extends TelegramLongPollingBot {
     private boolean isBotCalled(List<MessageEntity> entities) {
         if (entities != null) {
             for (MessageEntity entity : entities) {
-                if (entity.getText().equals("@everyone") ||
+                if (entity.getText().equals("/everyone@" + BOT_USERNAME) ||
+                    entity.getText().equals("@" + BOT_USERNAME) ||
                     entity.getText().equals("/everyone") ||
-                    entity.getText().equals("/everyone@" + BOT_USERNAME) ||
-                    entity.getText().equals(BOT_USERNAME)) return true;
+                    entity.getText().equals("@everyone")) return true;
             }
         }
         return false;
