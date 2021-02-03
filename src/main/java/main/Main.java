@@ -106,13 +106,7 @@ public class Main extends TelegramLongPollingBot {
             }
             case "/help", "/help@Everyone100Bot" -> helpCommand(chatId, isUserMessage);
             case "/donate", "/donate@Everyone100Bot" -> donateCommand(chatId);
-            case "/sendstats" -> {
-                if (chatId.equals(DEV_CHAT_ID)) {
-                    sender.sendString(DEV_CHAT_ID, "Бота добавлено в *" + chatsByChatIds.size() + " чата(-ов)*!");
-                } else {
-                    if (isUserMessage) sendUserMessage(chatId);
-                }
-            }
+            case "/sendstats" -> sendStatistics(chatId, isUserMessage);
             default -> {
                 if (isUserMessage) sendUserMessage(chatId);
             }
@@ -121,7 +115,7 @@ public class Main extends TelegramLongPollingBot {
 
     private void sendUserMessage(Long chatId) {
         String msg = """
-                *Привет! Я - бот для упоминания всех пользователей в чате* (практически всех). Сначала добавь меня в твой чат. Что я буду в нем делать: напиши @everyone или /everyone, и я упомяну всех в чате, чтоб они обратили внимание на твое сообщение
+                *Привет! Я - бот для упоминания всех пользователей в чате* (практически всех). Сначала добавь меня в твой чат. Что я буду в нем делать: напиши @everyone, /everyone, /everyone@Everyone100Bot или @Everyone100Bot, и я упомяну всех в чате, чтоб они обратили внимание на твое сообщение
 
                 *Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*
                                 
@@ -175,7 +169,7 @@ public class Main extends TelegramLongPollingBot {
 
     private void sendFirstGroupMessage(Long chatId) {
         String msg = """
-                *Привет! Я - бот для упоминания всех пользователей в чате* (практически всех). Что я буду делать в чате: напиши @everyone или /everyone, и я упомяну всех в чате, чтоб они обратили внимание на твое сообщение
+                *Привет! Я - бот для упоминания всех пользователей в чате* (практически всех). Что я буду делать в чате: напиши @everyone, /everyone, /everyone@Everyone100Bot или @Everyone100Bot, и я упомяну всех в чате, чтоб они обратили внимание на твое сообщение
 
                 *Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*
                                 
@@ -217,8 +211,8 @@ public class Main extends TelegramLongPollingBot {
             for (MessageEntity entity : entities) {
                 if (entity.getText().equals("@everyone") ||
                     entity.getText().equals("/everyone") ||
-                    entity.getText().equals("/everyone@" + BOT_USERNAME))
-                    return true;
+                    entity.getText().equals("/everyone@" + BOT_USERNAME) ||
+                    entity.getText().equals(BOT_USERNAME)) return true;
             }
         }
         return false;
@@ -249,12 +243,31 @@ public class Main extends TelegramLongPollingBot {
 
     // commands
 
+    private void switchMuteCommand(Long chatId, Integer userId, Integer messageId) {
+        BotChat chat = getChat(chatId);
+        boolean isMuted = chat.switchMute(userId);
+        String msg = "Теперь я " + (isMuted ? "не " : "") + "буду вас упоминать";
+
+        SERVICE.saveBotChat(chat);
+        sender.sendString(chatId, msg);
+
+        /*try {
+            Message message = sender.sendString(chatId, msg);
+            sender.deleteMessage(chatId, messageId);
+            Thread.sleep(WAIT_TO_DELETE_MILLIS);
+            sender.deleteMessage(chatId, message.getMessageId());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
+
+    } // TODO get admin rights
+
     private void helpCommand(Long chatId, boolean isUserMessage) {
         String msg;
 
         if (isUserMessage) {
             msg = """
-                    *Я - бот для упоминания всех пользователей в чате* (практически всех). Сначала добавь меня в твой чат. Что я буду в нем делать: напиши @everyone или /everyone, и я упомяну всех в чате, чтоб они обратили внимание на твое сообщение
+                    *Я - бот для упоминания всех пользователей в чате* (практически всех). Сначала добавь меня в твой чат. Что я буду в нем делать: напиши @everyone, /everyone, /everyone@Everyone100Bot или @Everyone100Bot, и я упомяну всех в чате, чтоб они обратили внимание на твое сообщение
 
                     *Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*
                                     
@@ -265,7 +278,7 @@ public class Main extends TelegramLongPollingBot {
                     /donate - Помочь творителю""";
         } else {
             msg = """
-                    *Я - бот для упоминания всех пользователей в чате* (практически всех). Что я буду делать в чате: напиши @everyone или /everyone, и я упомяну всех в чате, чтоб они обратили внимание на твое сообщение
+                    *Я - бот для упоминания всех пользователей в чате* (практически всех). Что я буду делать в чате: напиши @everyone, /everyone, /everyone@Everyone100Bot или @Everyone100Bot, и я упомяну всех в чате, чтоб они обратили внимание на твое сообщение
 
                     *Примечание:* из-за того, что Телеграм не дает ботам информацию про пользователей чата, я обхожу это ограничение по-другому. Я сохраняю тех юзеров, которые написали хоть раз пока я был в чате, потом их упоминаю. *Так что я не всех смогу упомянуть!*
                                     
@@ -285,24 +298,15 @@ public class Main extends TelegramLongPollingBot {
         sender.sendStringAndInlineKeyboard(chatId, msg, getDonationKeyboard());
     }
 
-    private void switchMuteCommand(Long chatId, Integer userId, Integer messageId) {
-        BotChat chat = getChat(chatId);
-        boolean isMuted = chat.switchMute(userId);
-        String msg = "Теперь я " + (isMuted ? "не " : "") + "буду вас упоминать";
+    // admin commands
 
-        SERVICE.saveBotChat(chat);
-        sender.sendString(chatId, msg);
-
-        /*try {
-            Message message = sender.sendString(chatId, msg);
-            sender.deleteMessage(chatId, messageId);
-            Thread.sleep(WAIT_TO_DELETE_MILLIS);
-            sender.deleteMessage(chatId, message.getMessageId());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }*/
-
-    } // TODO get admin rights
+    private void sendStatistics(Long chatId, boolean isUserMessage) {
+        if (chatId.equals(DEV_CHAT_ID)) {
+            sender.sendString(DEV_CHAT_ID, "Бота добавлено в *" + chatsByChatIds.size() + " чата(-ов)*!");
+        } else {
+            if (isUserMessage) sendUserMessage(chatId);
+        }
+    }
 
     // keyboards
 
