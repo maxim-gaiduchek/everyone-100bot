@@ -81,7 +81,8 @@ public class Main extends TelegramLongPollingBot {
             parseCommand(message);
         } else if (message.isUserMessage()) {
             sendUserMessage(message.getChatId());
-        } else if (message.isGroupMessage() || message.isSuperGroupMessage()) {
+        }
+        if (message.isGroupMessage() || message.isSuperGroupMessage()) {
             parseGroupMessage(message);
         } else {
             sender.leaveChat(message.getChatId());
