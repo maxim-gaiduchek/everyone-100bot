@@ -84,7 +84,7 @@ public class Main extends TelegramLongPollingBot {
         }
         if (message.isGroupMessage() || message.isSuperGroupMessage()) {
             parseGroupMessage(message);
-        } else {
+        } else if (!message.isUserMessage()) {
             sender.leaveChat(message.getChatId());
         }
     }
@@ -160,11 +160,11 @@ public class Main extends TelegramLongPollingBot {
             e.printStackTrace();
         }
 
-        SERVICE.saveBotChat(chat);
-
         if (isBotCalled(message.getEntities())) {
             sendReply(chat, chatId, messageId);
         }
+
+        SERVICE.saveBotChat(chat);
     }
 
     private void sendFirstGroupMessage(Long chatId) {
@@ -223,6 +223,18 @@ public class Main extends TelegramLongPollingBot {
         List<ChatUser> users = chat.getUsers();
         int noReplyCounter = 0;
 
+        users.sort((u1, u2) -> {
+            if (chat.isMuted(u1.getUserId()) && chat.isMuted(u2.getUserId())) {
+                return u1.getName().compareTo(u2.getName());
+            } else if (chat.isMuted(u1.getUserId())) {
+                return 1;
+            } else if (chat.isMuted(u2.getUserId())) {
+                return -1;
+            } else {
+                return u1.getName().compareTo(u2.getName());
+            }
+        });
+
         for (ChatUser user : users) {
             if (!chat.isMuted(user.getUserId())) {
                 sb.append("[").append(user.getName()).append("](tg://user?id=").append(user.getUserId()).append(") ");
@@ -239,6 +251,7 @@ public class Main extends TelegramLongPollingBot {
         sb.append(")_");
 
         sender.sendString(chatId, sb.toString(), messageId);
+        chat.incrementCallCounter();
     }
 
     // commands
@@ -302,7 +315,10 @@ public class Main extends TelegramLongPollingBot {
 
     private void sendStatistics(Long chatId, boolean isUserMessage) {
         if (chatId.equals(DEV_CHAT_ID)) {
-            sender.sendString(DEV_CHAT_ID, "Бота добавлено в *" + chatsByChatIds.size() + " чата(-ов)*!");
+            String msg = "Бота добавлено в *" + chatsByChatIds.size() + " чата(-ов)*!\n" +
+                         "Ботом воспользовались *" + SERVICE.getSumOfCallCounters() + " раза(-)*!";
+
+            sender.sendString(DEV_CHAT_ID, msg);
         } else {
             if (isUserMessage) sendUserMessage(chatId);
         }

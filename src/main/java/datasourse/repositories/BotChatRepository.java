@@ -13,6 +13,9 @@ public interface BotChatRepository extends JpaRepository<BotChat, Integer> {
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE BotChat chat SET chat.users = ?2 WHERE chat.id = ?1")
+    @Query("UPDATE BotChat chat SET chat.users = ?2 WHERE chat.id = ?1")
     void updateUserName(int id, Map<Integer, ChatUser> users);
+
+    @Query("SELECT SUM(chat.callCounter) FROM BotChat chat")
+    int getSumOfCallCounters();
 }

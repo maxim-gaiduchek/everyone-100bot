@@ -30,6 +30,9 @@ public class BotChat {
     @Convert(converter = IntegerListToStringConverter.class)
     private final List<Integer> muted = new ArrayList<>();
 
+    @Column(name = "calls")
+    private int callCounter;
+
     private BotChat() {
     }
 
@@ -88,6 +91,10 @@ public class BotChat {
         return !isMuted;
     }
 
+    public void incrementCallCounter() {
+        callCounter++;
+    }
+
     // core
 
     @Override
@@ -106,10 +113,11 @@ public class BotChat {
     @Override
     public String toString() {
         return "BotChat{" +
-                "id=" + id +
-                ", chatId=" + chatId +
-                ", users=" + users +
-                ", muted=" + muted +
-                '}';
+               "id=" + id +
+               ", chatId=" + chatId +
+               ", users=" + users +
+               ", muted=" + muted +
+               ", callCounter=" + callCounter +
+               '}';
     }
 }

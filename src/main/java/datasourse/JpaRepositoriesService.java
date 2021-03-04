@@ -32,4 +32,9 @@ public class JpaRepositoriesService implements Service {
     public void updateBotChatUserName(BotChat chat) {
         repository.updateUserName(chat.getId(), chat.getUsersMap());
     }
+
+    @Override
+    public int getSumOfCallCounters() {
+        return repository.getSumOfCallCounters();
+    }
 }

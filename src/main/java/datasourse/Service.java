@@ -13,4 +13,6 @@ public interface Service {
     void saveBotChat(BotChat chat);
 
     void updateBotChatUserName(BotChat chat);
+
+    int getSumOfCallCounters();
 }

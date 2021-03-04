@@ -6,6 +6,7 @@ public class ChatUser {
 
     private String name;
     private final Integer userId;
+    // TODO isMuted
 
     public ChatUser(User user) {
         name = user.getFirstName();
